@@ -1,0 +1,28 @@
+Warning, take caution when removing this mod while a weather event is active. Reduced solar efficiency is applied to the global surface, and will not automatically be returned to normal. If solar efficiency is stuck at <100% when a weather event is not active, it can be reset by running the command
+    /c game.player.surface.solar_power_multiplier = 1
+Though this will not play nice with SE planets, which have different default solar multipliers. 
+
+To make bots automatically go repair them, the dustiness of a panel is applied by lowering their health. So if a dusty panel ever gets damaged for real, they will have lower than usual health. Don't be using solar panels for biter defense. 
+
+
+
+TODO
+[ ] Dusty panels
+    [x] prototype
+    [x] replace repaired panels with the clean panel
+    [ ] solar panel prototype verification + map
+        [ ] optimize find_entities_filtered
+[ ] Scheduled conversion during storms
+    [x] sorted list of existing panels
+    [ ] heap for newly added panels
+    [ ] noise functions
+[ ] Disable roboports during severe storms
+[ ] Display storm info somewhere. Affected by
+    [ ] trees destroyed - planted
+    [ ] pollution produced
+    [ ] time? (nah, just pollution)
+[ ] storm animations
+[ ] storm blows pollution (wind speed?)
+
+
+
