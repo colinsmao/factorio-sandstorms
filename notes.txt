@@ -2,7 +2,7 @@ Warning, take caution when removing this mod while a weather event is active. Re
     /c game.player.surface.solar_power_multiplier = 1
 Though this will not play nice with SE planets, which have different default solar multipliers. 
 
-To make bots automatically go repair them, the dustiness of a panel is applied by lowering their health. So if a dusty panel ever gets damaged for real, they will have lower than usual health. Don't be using solar panels for biter defense. 
+To make bots automatically go clean/repair them, the dustiness of a panel is applied by increasing their maximum health (but not current health). When the extra health is repaired, the panel changes back to a regular solar panel. Due to the jankiness of this implementation, mining a dusty panel will always return a full health regular panel. Otherwise you end up losing health, since transfer_entity_health_to_products seems to transfer health_ratio rather than absolute health points.
 
 
 

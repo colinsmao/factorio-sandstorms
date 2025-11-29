@@ -102,7 +102,7 @@ end
 ---@param multiplier number
 local function set_solar_multiplier(surface, multiplier)
   surface.solar_power_multiplier = get_original_solar(surface.name) * multiplier
-  game.print("solar for surface "..surface.name.." set to "..get_original_solar(surface.name).." * "..multiplier.." = "..surface.solar_power_multiplier)
+  -- game.print("solar for surface "..surface.name.." set to "..get_original_solar(surface.name).." * "..multiplier.." = "..surface.solar_power_multiplier)
 end
 
 ---@param position MapPosition
@@ -142,13 +142,15 @@ local function create_dust_storm(surface, intensity, start_tick, duration, ramp_
     local min_score = 0
     local max_score = 0
     for _, panel in pairs(surface.find_entities_filtered{type = "solar-panel"}) do
-      local score = noise_function_linear(panel.position)
-      table.insert(solar_panels, {
-        entity = panel,
-        score = score
-      })
-      if score < min_score then min_score = score end
-      if score > max_score then max_score = score end
+      if string.sub(panel.name, -6) ~= "-dusty" then
+        local score = noise_function_linear(panel.position)
+        table.insert(solar_panels, {
+          entity = panel,
+          score = score
+        })
+        if score < min_score then min_score = score end
+        if score > max_score then max_score = score end
+      end
     end
     local score_range = max_score - min_score
     if score_range > 0 then
@@ -188,6 +190,7 @@ local function replace_panel(panel, new_name, health_multiplier)
     position = position,
     force = force,
     quality = quality,
+    create_build_effect_smoke = false,
   }
   if new_panel ~= nil then
     new_panel.health = health * (health_multiplier or 1)
@@ -228,11 +231,11 @@ end
 ---@param storm StormParams
 local function add_dust_from_storm(storm)
   -- stochastic binomial sampling to determine how many remaining clean panels become dusty
-  local num_dusty = sample_binomial_approx(#storm.solar_panels, 0.2 * storm.intensity)
+  local num_dusty = sample_binomial_approx(#storm.solar_panels, 0.002 * storm.intensity)
   for i=1,num_dusty do
     local last = storm.solar_panels[#storm.solar_panels]  -- peek the last element O(1)
     if last.entity.valid then
-      make_panel_dusty(last.entity, 0.5)
+      make_panel_dusty(last.entity)  -- 0.5
     end
     table.remove(storm.solar_panels)  -- pop the last element O(1)
   end

@@ -1,4 +1,5 @@
-
+---@param picture (data.Sprite)[]|data.SpriteSheet|data.SpriteVariations.struct
+---@return (data.Sprite)[]|data.SpriteSheet|data.SpriteVariations.struct
 local function tint_picture(picture, tint)
   local result = {}
   for _, layer in pairs(picture.layers) do
@@ -18,16 +19,31 @@ local function tint_picture(picture, tint)
   return result
 end
 
+---@param input string
+---@param factor number
+---@return string
+local function multiply_with_units(input, factor)
+    local value, unit = input:match("([%d%.]+)(%a+)")
+    value = tonumber(value)
+    if not value then error("Invalid power string: " .. tostring(input)) end
+    return (value * factor) .. unit
+end
+
+---@param panel_entity data.SolarPanelPrototype
 local function create_dusty_panel_entity(panel_entity)
   local result = table.deepcopy(panel_entity)
   result.name = panel_entity.name .. "-dusty"
   result.localised_name = {"entity-name.dusty-solar-panel", panel_entity.localised_name or {"entity-name." .. panel_entity.name}}
   result.localised_description = {"entity-description.dusty-solar-panel", panel_entity.localised_name or {"entity-name." .. panel_entity.name}}
-  result.pictures = tint_picture(panel_entity.picture, {r=1, g=0.667, b=0, a=1})
+  -- TODO: fix tinting (or make a proper sprite)
+  -- result.picture = tint_picture(panel_entity.picture, {r=1, g=0.667, b=0, a=1})
+  result.max_health = panel_entity.max_health * 2
   result.repair_speed_modifier = (panel_entity.repair_speed_modifier or 1) * 0.25
-  result.production = panel_entity.production * 0.2
+  result.production = multiply_with_units(panel_entity.production, 0.2)
   if data.raw["item"][panel_entity.name] ~= nil then
-    result.placable_by = panel_entity.name  -- q picker & blueprints select the un-dusty panel
+    result.placeable_by = {item=panel_entity.name, count=1}  -- q picker & blueprints select the un-dusty panel
+    result.minable["result"] = panel_entity.name
+    result.minable["transfer_entity_health_to_products"] = false
   end
   -- replace with un-dusty panel ghost on death
   result.create_ghost_on_death = false
@@ -39,6 +55,7 @@ local function create_dusty_panel_entity(panel_entity)
   return result
 end
 
+---@param panel_item data.ItemPrototype
 local function create_dusty_panel_item(panel_item)
   local result = table.deepcopy(panel_item)
   result.name = panel_item.name .. "-dusty"
@@ -50,11 +67,11 @@ local function create_dusty_panel_item(panel_item)
   return result
 end
 
-local to_add = {}
+local to_add = {}  -- prevent recursive loop
 for name, panel_entity in pairs(data.raw["solar-panel"]) do
   table.insert(to_add, create_dusty_panel_entity(panel_entity))
-  local panel_item = data.raw["item"][name]
-  data:extend({create_dusty_panel_item(panel_item)})
+  -- local panel_item = data.raw["item"][name]
+  -- data:extend({create_dusty_panel_item(panel_item)})
 end
 data:extend(to_add)
 
